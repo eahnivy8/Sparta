@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+Tamma+2&family=Nanum+Pen+Script&display=swap"
+    rel="stylesheet">
+
+  <title> 원페이지 쇼핑몰 만들기 </title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" rel="stylesheet">
+  <script>
+    function orderComplete(){
+      alert("정삭적으로 주문이 접수되었습니다.");
+    }
+  </script>
+  <style>
+    * {
+      font-family: 'Baloo Tamma 2', cursive;
+    }
+
+    .wrap {
+      margin: 10px auto;
+      width: 500px;
+    }
+
+    .button {
+      text-align: center;
+      background-color: blue;
+      border: none;
+      color: white;
+      padding: 15px 32px;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+      cursor: pointer;
+    }
+
+    div.centered {
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <img
+      src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fk.kakaocdn.net%2Fdn%2Fb23aIg%2FbtqD0ObbwWc%2FF0RNlNNcEnukbdlbxtYBnk%2Fimg.png"
+      width=500 alt="clothes">
+
+    <h1> 블루 가디건 판매<span style="font-size: small;"><i> 가격: 200,000원/개 </i> </span> </h1>
+    <p> 시원한 느낌을 주는 블루컬러와 얼굴모양의 로고가 포인트인 아크네가디건 입니다. 지금 같은 간절기 날씨에 코디하기 좋은 아이템입니다.</p>
+    <h1><b>주문하기</b></h1>
+
+    <ul>
+      <li>
+        <label for="buyer" class="title">주문자 성함:</label>
+        <input type="text" name="textfield" style="text-align:left; width:450px; letter-spacing: 1px">
+      </li>
+      <li>
+        <label for="quantity" class="title">수량:</label>
+        <input type="number" name="textfield" placeholder="-- 수량을 선택하세요 --" min="1" max="30"
+          style="text-align:left; width:450px; letter-spacing: 1px">
+      </li>
+      <li>
+        <label for="address" class="title">주소:</label>
+        <input type="text" name="textfield" style="text-align:left; width:450px; letter-spacing: 1px">
+      </li>
+      <li>
+        <label for="tel" class="title">전화번호:</label>
+        <input type="tel" name="textfield" style="text-align:left; width:450px; letter-spacing: 1px">
+      </li>
+    </ul>
+
+    <div class="centered">
+      <button class="button" onclick="orderComplete()">주문하기</button>
+    </div>
+
+  </div>
+
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+    integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>
