@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>JQuery 연습하고 가기! - 8기 이동현반</title>
+    <!-- JQuery를 import 합니다 -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <style type="text/css">
+        div.question-box {
+            margin: 10px 0 20px 0;
+        }
+
+        div.question-box>div {
+            margin-top: 30px;
+        }
+    </style>
+
+    <script>
+        function q1() {
+            let textInfo = $("#input-q1").val()
+            if (textInfo == "고양이" || textInfo == "cat") {
+                let url = "https://api.thecatapi.com/v1/images/search"
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    data: {},
+                    success: function (response) {
+                        let imgUrl = response[0]["url"];
+                        $("#img").attr("src", imgUrl);
+                    }
+                })
+            } else if (textInfo == "개" || textInfo == "강아지" || textInfo == "dog" || textInfo == "puppy") {
+                let url = "https://dog.ceo/api/breeds/image/random"
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    data: {},
+                    success: function (response) {
+                        let imgUrl = response["message"];
+                        $("#img").attr("src", imgUrl);
+                    }
+                })
+            } else {
+                alert("제대로 입력하세요!!!");
+            }
+        }
+    </script>
+
+</head>
+
+<body>
+    <h1>JQuery+Ajax의 조합을 연습하자!</h1>
+    <hr />
+    <div class="question-box">
+        <h2>고양이 + 개 사진 API를 이용하기</h2>
+        <p>입력창에 한글로 개, 강아지 혹은 dog, puppy 라고 입력하면 강아지 사진을.</p>
+        <p>입력창에 한글로 고양이 혹은 cat이라고 입력하면 고양이 사진을.</p>
+        <p>그 이외의 경우에는 제대로 입력하세요!!! 라고 Alert을!</p>
+        <input id="input-q1" type="text" />
+        <button onclick="q1()">어떤 동물을 볼까?</button>
+        <div>
+            <img id="img" src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" />
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <link href="https://fonts.googleapis.com/css2?family=Chelsea+Market&display=swap" rel="stylesheet">
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+    <!-- JQuery import -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <title> 원페이지 쇼핑몰 만들기 </title>
+
+    <script>
+
+        function make_review() {
+            let buyerInfo = $("#buyer-info").val()
+            let quantityInfo = $("#quantity-info option:selected").val()
+            let addressInfo = $("#address-info").val()
+            let telInfo = $("#tel-info").val()
+            if (buyerInfo == "") {
+                alert("주문자 정보가 필요합니다.");
+                return;
+            } else if (quantityInfo == "") {
+                alert("수량 정보가 필요합니다.");
+                return;
+            } else if (addressInfo == "") {
+                alert("주소 정보가 필요합니다.");
+                return;
+            } else if (telInfo == "") {
+                alert("연락처 정보가 필요합니다.");
+                return;
+            }
+            $.ajax({
+                type: 'POST', // 타입을 작성합니다.
+                url: '/reviews', // url을 작성합니다.
+                data: { buyer_give: buyerInfo, quantity_give: quantityInfo, address_give: addressInfo, tel_give: telInfo }, // data를 작성합니다. },
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        // alert("정삭적으로 주문이 접수되었습니다.");
+                        alert(response['msg']);
+                        window.location.reload();
+                    }
+                }
+            })
+        }
+        $(document).ready(function () {
+            $('#orders-box').html('');
+            listing();
+            let apiUrl = "https://api.manana.kr/exchange/rate.json"
+            $.ajax({
+                type: "GET",
+                url: apiUrl,
+                data: {},
+                success: function (response) {
+                    let dollarWonRate = response[1]["rate"]
+                    let tempHtml = `<p id="rate"><i>달러-원 환율: ${dollarWonRate}</i></p>`
+                    // console.log(tempHtml)
+                    $("#customer-info").append(tempHtml)
+                }
+            })
+        });
+        function listing() {
+            $.ajax({
+                type: "GET",
+                url: "/reviews",
+                data: {},
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        console.log(response)
+
+                        let reviews = response["all_review"];
+                        // alert(reviews)
+                        for (let i = 0; i < reviews.length; i++) {
+                            make_card(reviews[i]['buyer'], reviews[i]['quantity'], reviews[i]['address'], reviews[i]['tel'])
+                        }
+                    } else {
+                        alert('리뷰를 가져오지 못함');
+                    }
+                }
+            })
+        }
+        function make_card(buyerInfo, quantityInfo, addressInfo, telInfo) {
+            let temp_html = `<tr>
+                    <td>${buyerInfo}</td>
+                    <td>${quantityInfo}</td>
+                    <td>${addressInfo}</td>
+                    <td>${telInfo}</td>
+                </tr>`
+
+            $('#orders-box').append(temp_html)
+        }
+    </script>
+
+    <style>
+        * {
+            font-family: 'Chelsea Market', cursive;
+        }
+
+        .wrap {
+            margin: 20px auto;
+            width: 500px;
+        }
+
+        .button {
+            text-align: center;
+            background-color: blue;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        .centered {
+            text-align: center;
+        }
+
+        #rate {
+            color: blue;
+            font-size: 14px;
+        }
+
+        #order-text {
+            font-size: 25px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="info" id="customer-info">
+            <img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fk.kakaocdn.net%2Fdn%2Fb23aIg%2FbtqD0ObbwWc%2FF0RNlNNcEnukbdlbxtYBnk%2Fimg.png"
+                width="500" alt="clothes">
+
+            <h1> 블루 가디건 판매<span style="font-size: small;"><i> 가격: US$200/개 </i> </span> </h1>
+            <p> 시원한 느낌을 주는 블루컬러와 얼굴모양의 로고가 포인트인 아크네가디건 입니다. 지금 같은 간절기 날씨에 코디하기 좋은 아이템입니다.</p>
+            <h1 id="order-text">주문하기</h1>
+        </div>
+        <div class="form">
+            <form>
+                <ul>
+                    <li>
+                        <label for="buyer" class="title">주문자 성함</label>
+                        <input id="buyer-info" type="text" placeholder="성함을 입력해 주세요" name="textfield"
+                            style="text-align:left; width:450px; letter-spacing: 1px">
+                    </li>
+                    <li>
+                        <label for="quantity" class="title"><br>주문 수량</label>
+                        <select id="quantity-info" name="수량" style="width:450px; letter-spacing: 1px; font-size: 14px;"> 수량
+                            <option value="">--수량을 선택하세요--</option>
+                            <option value="1개">1개</option>
+                            <option value="2개">2개</option>
+                            <option value="3개">3개</option>
+                            <option value="4개">4개</option>
+                        </select>
+                    </li>
+                    <li>
+                        <label for="address" class="title"><br>주소</label>
+                        <input id="address-info" type="text" placeholder="주소를 입력해 주세요" name="textfield"
+                            style="text-align:left; width:450px; letter-spacing: 1px">
+                    </li>
+                    <li>
+                        <label for="tel" class="title"><br>전화번호</label>
+                        <input id="tel-info" type="tel" placeholder="연락처를 입력해 주세요" name="textfield"
+                            style="text-align:left; width:450px; letter-spacing: 1px">
+                    </li>
+                </ul>
+            </form>
+        </div>
+
+        <div class="centered">
+            <button class="button" onclick="make_review()">주문하기</button>
+        </div>
+
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">이름</th>
+                    <th scope="col">주문수량</th>
+                    <th scope="col">주소</th>
+                    <th scope="col">전화번호</th>
+                </tr>
+            </thead>
+            <tbody id="orders-box">
+                <tr>
+                    <th scope="row">1</th>
+                    <td>Mark</td>
+                    <td>Otto</td>
+                    <td>@mdo</td>
+                </tr>
+                <tr>
+                    <th scope="row">2</th>
+                    <td>Jacob</td>
+                    <td>Thornton</td>
+                    <td>@fat</td>
+                </tr>
+                <tr>
+                    <th scope="row">3</th>
+                    <td>Larry</td>
+                    <td>the Bird</td>
+                    <td>@twitter</td>
+                </tr>
+            </tbody>
+        </table>
+        <!-- <div class="customer-table" id="orders-box"> </div> -->
+
+    </div>
+
+</body>
+
+</html>
