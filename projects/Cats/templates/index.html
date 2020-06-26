@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>동물병원 검색</title>
+    <script type="text/javascript"
+        src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=7okd2203br&submodules=geocoder""></script>
+    <link href=" https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+    <link rel=" stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+    <script src=" https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <style>
+        #map {
+            width: 700px;
+            height: 500px;
+            margin: 50px auto 50px auto;
+        }
+
+        .wrap {
+            width: 700px;
+            margin: 10px auto;
+        }
+
+        .hospital-list {
+            overflow: scroll;
+            width: 700px;
+            height: 800px;
+        }
+    </style>
+    <meta property="og:title" content="내 사이트의 제목" />
+    <meta property="og:description" content="보고 있는 페이지의 내용 요약" />
+    <meta property="og:image" content="{{ url_for('static', filename='images/ogimage_hospital.png') }}" />
+</head>
+
+<body>
+    <div class="wrap">
+        <h1>우리 동네 동물병원 검색</h1>
+        <div class="input-group mb-3">
+            <select class="js-example-basic-single" name="gu" id="gu-name">
+                <option value="">--지역을 선택하세요--</option>
+                <option value="종로구">종로구</option>
+                <option value="중구">중구</option>
+                <option value="용산구">용산구</option>
+                <option value="성동구">성동구</option>
+                <option value="광진구">광진구</option>
+                <option value="동대문구">동대문구</option>
+                <option value="중랑구">중랑구</option>
+                <option value="성북구">성북구</option>
+                <option value="강북구">강북구</option>
+                <option value="도봉구">도봉구</option>
+                <option value="노원구">노원구</option>
+                <option value="은평구">은평구</option>
+                <option value="서대문구">서대문구</option>
+                <option value="마포구">마포구</option>
+                <option value="양천구">양천구</option>
+                <option value="강서구">강서구</option>
+                <option value="구로구">구로구</option>
+                <option value="금천구">금천구</option>
+                <option value="영등포구">영등포구</option>
+                <option value="동작구">동작구</option>
+                <option value="관악구">관악구</option>
+                <option value="서초구">서초구</option>
+                <option value="강남구">강남구</option>
+                <option value="송파구">송파구</option>
+                <option value="강동구">강동구</option>                      
+              </select>
+            <!-- <input id="gu-name" type="text" class="form-control" placeholder="예) 강남구">  -->
+            <div class="input-group-append">
+                <button type="button" class="btn btn-success" onclick="find_my_best_place()">검색</button>
+            </div>
+        </div>
+        <div id="map"></div>
+
+        <div class="hospital-list" id="hospital-box">
+        </div>
+    </div>
+
+    <script>
+        let seoulGu = ["종로구", "중구", "용산구", "성동구", "광진구", "동대문구", "중랑구", "성북구", "강북구", "도봉구", "노원구", "은평구", "서대문구", "마포구", "양천구", "강서구", "구로구", "금천구", "영등포구", "동작구", "관악구", "서초구", "강남구", "송파구", "강동구"];
+
+        // 전달받은 구 이름이 seoulGu 목록에 있는지 확인
+        function isValidGuName(guName) {
+            for (let i = 0; i < seoulGu.length; i++) {
+                if (guName == seoulGu[i]) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        // TM128 좌표를 위도(lat), 경도(lng) 딕셔너리로 반환
+        function getLatLng(mapx, mapy) {
+            // 문자열 -> 숫자로 변환
+            let x = parseInt(mapx);
+            let y = parseInt(mapy);
+
+            // 네이버가 제공하는 변환 함수 사용
+            let geoInfo = naver.maps.TransCoord.fromTM128ToLatLng(new naver.maps.Point(x, y));
+            // 변환 딕셔너리 반환
+            return { 'lat': geoInfo._lat, 'lng': geoInfo._lng }
+        }
+
+        // hospitalList 좌표 정보를 바꾸기
+        function getHospitalListWithGeoData(hospitalList) {
+            // 반환할 맛집 목록
+            let result = [];
+
+            for (let i = 0; i < hospitalList.length; i++) {
+                // 개별 병원 데이터를 hospital에 저장
+                let hospital = hospitalList[i];
+                let mapx = hospital['mapx'];
+                let mapy = hospital['mapy'];
+                // TM128 좌표를 위도(lat), 경도(lng) 딕셔너리로 반환
+                let geoData = getLatLng(mapx, mapy);
+                // geoData 라는 이름으로 맛집 데이터에 추가
+                hospital['geoData'] = geoData;
+                // 반환할 병원 목록에 추가
+                result.push(hospital);
+            }
+            // 병원 목록 반환
+            return result;
+        }
+
+        // 병원 검색 요청
+        function find_my_best_place() {
+            let guName = $('#gu-name').val();
+            if (guName == '') {
+                alert('구 이름을 입력하세요');
+                return;
+            }
+            if (isValidGuName(guName) == false) {
+                alert('올바른 구 이름을 입력하세요');
+                return;
+            }
+            // 기존 병원 목록이 있으면 지우기
+            $('#hospital-box').empty();
+            // 병원 정보 요청
+            $.ajax({
+                type: "GET",
+                url: `/hospital?gu_give=${guName}`,
+                data: {},
+                success: function (response) {
+                    // 병원 요청 성공 여부 검사
+                    if (response['result'] == 'success') {
+                        // alert(response['result']);
+                        // 전달받은 병원 리스트를 hospitalList에 저장한다.
+                        let hospitalList = response['hospital_list'];
+                        // alert(hospitalList)
+                        hospitalList = getHospitalListWithGeoData(hospitalList);
+                        // 병원리스트를 HTML로 추가하기
+                        addHTML(hospitalList);
+                        // 지도 그리기 
+                        drawMap(hospitalList);
+                    } else {
+                        alert('검색이 실패하였습니다.');
+                    }
+                }
+            });
+        }
+        function drawMap(hospitalList) {
+            // 1등 병원의 위치 정보를 geoData에 저장합니다.
+            let geoData = hospitalList[0]['geoData'];
+            // 마커 목록 만들기
+            let markerList = [];
+            let contents = [];
+            // 1등 병원을 지도의 중심에 놓습니다.
+            let numberOne = new naver.maps.LatLng(geoData['lat'], geoData['lng']),
+                map = new naver.maps.Map('map', {
+                    center: numberOne,
+                    zoom: 12
+                }),
+                marker = new naver.maps.Marker({
+                    position: numberOne,
+                    map: map
+                });
+
+            // 2등부터 마지막까지 병원 데이터를 지도에 표시합니다.
+            for (let i = 1; i < hospitalList.length; i++) {
+                let hospital = hospitalList[i];
+                let position = new naver.maps.LatLng(hospital['geoData']['lat'], hospital['geoData']['lng'])
+                marker = new naver.maps.Marker({
+                    position: position,
+                    map: map
+                });
+                // 마커를 클릭해을 떄 보여줄 창을 HTML 태그로 만듬.
+                let contentString = `<div class="iw_inner">
+                            <h3>${hospital['title']}</h3>
+                            <p>${hospital['address']}<br />
+                                ${hospital['category']}<br />
+                                <a href="${hospital['link']}" target="_blank">링크</a>
+                            </p>
+                            </div>`;
+                // contents에 태그를 저장 
+                contents.push(contentString);
+                // 마커 목록에 markerList 저장하기 
+                markerList.push(marker)
+            }
+            // 클래스명이 hospital-title 카드 정보를 추출 
+            const hospitalElement = $('.hospital-title');
+            for (let i = 0; i < markerList.length; i++) {
+                let marker = markerList[i];
+                let infowindow = new naver.maps.InfoWindow({
+                    content: contents[i],
+                    maxWidth: 140,
+                    backgroundColor: "#eee",
+                    borderColor: "#2db400",
+                    borderWidth: 5,
+                    anchorSize: new naver.maps.Size(30, 30),
+                    anchorSkew: true,
+                    anchorColor: "#eee",
+                    pixelOffset: new naver.maps.Point(20, -20)
+                });
+                // 마커를 클릭했을 때 지도 위에 정보 띄우기
+                naver.maps.Event.addListener(marker, "click", function (e) {
+                    if (infowindow.getMap()) {
+                        infowindow.close();
+                    } else {
+                        infowindow.open(map, marker);
+                    }
+                });
+                // 맛집 HTML의 상호명을 클릭했을 때 지도 위에 정보 띄우기
+                hospitalElement[i].addEventListener('click', function (e) {
+                    e.preventDefault();
+                    if (infowindow.getMap()) {
+                        infowindow.close();
+                    } else {
+                        infowindow.open(map, marker);
+                    }
+                })
+
+            }
+
+        }
+        function addHTML(hospitalList) {
+            for (let i = 0; i < hospitalList.length; i++) {
+                let tempHtml = makeCard(hospitalList[i]);
+                $('#hospital-box').append(tempHtml);
+            }
+        }
+        function makeCard(hospital) {
+            return `<div class="card">
+            <div class="card-body">
+                <h5 class="card-title"><a href="#" class="hospital-title">${hospital['title']}</a></h5>
+                <h6 class="card-subtitle mb-2 text-muted">${hospital['category']}</h6>
+                <p class="card-text">${hospital['roadAddress']}</p>
+                <a href="${hospital['link']}" target="_blank" class="card-link">링크</a>
+                <a href="#" class="card-link">${hospital['telephone']}</a>
+            </div>
+            </div>`;
+        }
+    </script>
+</body>
+
+</html>
